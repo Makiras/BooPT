@@ -1,0 +1,13 @@
+database:
+  host: localhost2
+  port: 54322
+  user: BooPT2
+  password: BooPTPassword2
+  db_name: BooPT2
+ldap:
+  addr: localhost:3892
+  user: BooPT2
+  password: BooPTPassword2
+  base_dn: dc=boo,dc=com
+log_level: 3
+jwt_salt: "salt2"
