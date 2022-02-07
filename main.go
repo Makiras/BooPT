@@ -57,4 +57,6 @@ func setPrivateRoutes(app *fiber.App) {
 	api := app.Group("/api")
 	r.SetupBookRouter(api)
 	r.SetupLinkRouter(api)
+	r.SetupTypeRouter(api)
+	r.SetupTagRouter(api)
 }

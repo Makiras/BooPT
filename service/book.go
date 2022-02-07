@@ -17,7 +17,7 @@ func GetBook(c *fiber.Ctx) error {
 	userState := jwtClaims["state"].(int)
 	var book m.Book
 	// Get book from database
-	if err := db.DB.Joins("Tags").Joins("Type").First(&book, bookID).Error; err != nil {
+	if err := db.DB.Joins("Tags").Joins("Types").First(&book, bookID).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			logrus.Warnf("User %v want to get book %v but it doesn't exist", c.Get("userID"), bookID)
 			return c.Status(404).JSON(fiber.Map{"error": "Book not found"})
@@ -83,14 +83,14 @@ func GetBookList(c *fiber.Ctx) error {
 	}
 
 	if bookReq.TypeId != 0 { // limit by type
-		tx = tx.Joins("Type", "id = ?", bookReq.TypeId)
+		tx = tx.Joins("Types", "id = ?", bookReq.TypeId)
 	} else {
-		tx = tx.Joins("Type")
+		tx = tx.Joins("Types")
 	}
 	if len(bookReq.Tags) > 0 { // limit by tags, all tags must be in book
-		tx = tx.Preload("Tag", db.DB.Where("id IN (?)", bookReq.Tags)).Group("id").Having("COUNT(id) = ?", len(bookReq.Tags))
+		tx = tx.Preload("Tags", db.DB.Where("id IN (?)", bookReq.Tags)).Group("id").Having("COUNT(id) = ?", len(bookReq.Tags))
 	} else {
-		tx = tx.Preload("Tag")
+		tx = tx.Preload("Tags")
 	}
 	if len(bookReq.Title) > 0 { // limit by title
 		tx = tx.Where("title LIKE ?", "%"+bookReq.Title+"%")
@@ -266,7 +266,6 @@ func UpdateBook(c *fiber.Ctx) error {
 	// Modify book, maybe there is a better way to do this...
 	book.Title = m.UpdateIfNotEmpty(bookReq.Title, book.Title).(string)
 	book.Author = m.UpdateIfNotEmpty(bookReq.Author, book.Author).(string)
-	book.Tags = m.UpdateIfNotEmpty(pTags, book.Tags).([]*m.Tag)
 	book.TypeId = m.UpdateIfNotEmpty(bookReq.TypeId, book.TypeId).(int64)
 	book.BID = m.UpdateIfNotEmpty(bookReq.BID, book.BID).(int64)
 	book.Publisher = m.UpdateIfNotEmpty(bookReq.Publisher, book.Publisher).(string)
@@ -280,7 +279,13 @@ func UpdateBook(c *fiber.Ctx) error {
 		logrus.Errorf("User %v want to update book %v but it failed, %#v ", stuId, book.Title, err)
 		return c.Status(500).JSON(fiber.Map{"error": "Internal server error"})
 	}
-
+	if len(pTags) > 0 {
+		// Replace tags
+		if err := db.DB.Model(&book).Association("Tags").Replace(pTags).Error; err != nil {
+			logrus.Errorf("User %v want to update book %v but it failed, %#v", stuId, book.Title, err())
+			return c.Status(500).JSON(fiber.Map{"error": "Internal server error"})
+		}
+	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"status":  "success",
 		"message": "Book updated",

@@ -66,10 +66,6 @@ func UpdateIfNotEmpty(newValue, oldValue interface{}) interface{} {
 		if len(newValue.([]*int64)) != 0 {
 			return newValue
 		}
-	case []*Tag:
-		if len(newValue.([]*Tag)) != 0 {
-			return newValue
-		}
 	}
 	return nil
 }
