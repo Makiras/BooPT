@@ -15,9 +15,9 @@ import (
 func GetBookLink(c *fiber.Ctx) error {
 	bookID := c.Params("bookID")
 	jwtClaims := c.Locals("jwt").(*jwt.Token).Claims.(jwt.MapClaims)
-	userID := jwtClaims["sub"].(uint)
-	stuId := jwtClaims["stu_id"].(int64)
-	userState := jwtClaims["state"].(int)
+	userID := uint(jwtClaims["sub"].(float64))
+	stuId := int64(jwtClaims["stu_id"].(float64))
+	userState := int(jwtClaims["state"].(float64))
 
 	// Get book from database and fetch link
 	var book m.Book
@@ -61,9 +61,9 @@ func GetBookLink(c *fiber.Ctx) error {
 
 func GetLinkList(c *fiber.Ctx) error {
 	jwtClaims := c.Locals("jwt").(*jwt.Token).Claims.(jwt.MapClaims)
-	stuId := jwtClaims["stu_id"].(int64)
-	userId := jwtClaims["sub"].(uint)
-	userState := jwtClaims["state"].(int)
+	stuId := int64(jwtClaims["stu_id"].(float64))
+	userId := uint(jwtClaims["sub"].(float64))
+	userState := int(jwtClaims["state"].(float64))
 
 	offset, erro := strconv.Atoi(c.Query("offset", "0"))
 	limit, errl := strconv.Atoi(c.Query("limit", "30"))
@@ -99,9 +99,9 @@ func GetLinkList(c *fiber.Ctx) error {
 
 func UploadNewBookLink(c *fiber.Ctx) error {
 	jwtClaims := c.Locals("jwt").(*jwt.Token).Claims.(jwt.MapClaims)
-	stuId := jwtClaims["stu_id"].(int64)
-	userId := jwtClaims["sub"].(uint)
-	userState := jwtClaims["state"].(int)
+	stuId := int64(jwtClaims["stu_id"].(float64))
+	userId := uint(jwtClaims["sub"].(float64))
+	userState := int(jwtClaims["state"].(float64))
 
 	// Only authorized user is allowed to upload new link
 	var user m.User
@@ -164,9 +164,9 @@ func UploadNewBookLink(c *fiber.Ctx) error {
 
 func UpdateLink(c *fiber.Ctx) error {
 	jwtClaims := c.Locals("jwt").(*jwt.Token).Claims.(jwt.MapClaims)
-	stuId := jwtClaims["stu_id"].(int64)
-	userId := jwtClaims["sub"].(uint)
-	userState := jwtClaims["state"].(int)
+	stuId := int64(jwtClaims["stu_id"].(float64))
+	userId := uint(jwtClaims["sub"].(float64))
+	userState := int(jwtClaims["state"].(float64))
 
 	// Only authorized user is allowed to review link
 	var user m.User
@@ -214,9 +214,9 @@ func UpdateLink(c *fiber.Ctx) error {
 
 func DeleteLink(c *fiber.Ctx) error {
 	jwtClaims := c.Locals("jwt").(*jwt.Token).Claims.(jwt.MapClaims)
-	stuId := jwtClaims["stu_id"].(int64)
-	userId := jwtClaims["sub"].(uint)
-	userState := jwtClaims["state"].(int)
+	stuId := int64(jwtClaims["stu_id"].(float64))
+	userId := uint(jwtClaims["sub"].(float64))
+	userState := int(jwtClaims["state"].(float64))
 
 	// parse request body
 	linkId, err := strconv.ParseInt(c.Params("id"), 10, 64)

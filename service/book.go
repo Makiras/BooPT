@@ -13,11 +13,11 @@ import (
 func GetBook(c *fiber.Ctx) error {
 	bookID := c.Params("id")
 	jwtClaims := c.Locals("jwt").(*jwt.Token).Claims.(jwt.MapClaims)
-	stuId := jwtClaims["stu_id"].(int64)
-	userState := jwtClaims["state"].(int)
+	stuId := int64(jwtClaims["stu_id"].(float64))
+	userState := int(jwtClaims["state"].(float64))
 	var book m.Book
 	// Get book from database
-	if err := db.DB.Joins("Tags").Joins("Types").First(&book, bookID).Error; err != nil {
+	if err := db.DB.Preload("Tags").Joins("Type").First(&book, bookID).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			logrus.Warnf("User %v want to get book %v but it doesn't exist", c.Get("userID"), bookID)
 			return c.Status(404).JSON(fiber.Map{"error": "Book not found"})
@@ -51,9 +51,9 @@ func GetBook(c *fiber.Ctx) error {
 func GetBookList(c *fiber.Ctx) error {
 	var books []m.Book
 	jwtClaims := c.Locals("jwt").(*jwt.Token).Claims.(jwt.MapClaims)
-	stuId := jwtClaims["stu_id"].(int64)
-	userId := jwtClaims["sub"].(uint)
-	userState := jwtClaims["state"].(int)
+	stuId := int64(jwtClaims["stu_id"].(float64))
+	userId := uint(jwtClaims["sub"].(float64))
+	userState := int(jwtClaims["state"].(float64))
 
 	// Parse request
 	var bookReq r.Book
@@ -83,9 +83,9 @@ func GetBookList(c *fiber.Ctx) error {
 	}
 
 	if bookReq.TypeId != 0 { // limit by type
-		tx = tx.Joins("Types", "id = ?", bookReq.TypeId)
+		tx = tx.Joins("Type", "id = ?", bookReq.TypeId)
 	} else {
-		tx = tx.Joins("Types")
+		tx = tx.Joins("Type")
 	}
 	if len(bookReq.Tags) > 0 { // limit by tags, all tags must be in book
 		tx = tx.Preload("Tags", db.DB.Where("id IN (?)", bookReq.Tags)).Group("id").Having("COUNT(id) = ?", len(bookReq.Tags))
@@ -104,7 +104,7 @@ func GetBookList(c *fiber.Ctx) error {
 	if bookReq.BID != 0 { // limit by book id
 		tx = tx.Where("bid = ?", bookReq.BID)
 	}
-	if err := tx.Select("id").Offset(bookReq.Offset).Limit(bookReq.Limit).Find(&books).Error; err != nil {
+	if err := tx.Select("books.id").Offset(bookReq.Offset).Limit(bookReq.Limit).Find(&books).Error; err != nil {
 		logrus.Errorf("User %v want to get book list but error happend, %#v ", stuId, err)
 		return c.Status(500).JSON(fiber.Map{"error": "Internal server error"})
 	} else if len(books) == 0 {
@@ -134,9 +134,9 @@ func GetBookList(c *fiber.Ctx) error {
 
 func UploadNewBook(c *fiber.Ctx) error {
 	jwtClaims := c.Locals("jwt").(*jwt.Token).Claims.(jwt.MapClaims)
-	stuId := jwtClaims["stu_id"].(int64)
-	userId := jwtClaims["sub"].(uint)
-	userState := jwtClaims["state"].(int)
+	stuId := int64(jwtClaims["stu_id"].(float64))
+	userId := uint(jwtClaims["sub"].(float64))
+	userState := int(jwtClaims["state"].(float64))
 	// parse request body
 	var bookReq r.Book
 	if err := c.BodyParser(&bookReq); err != nil {
@@ -221,9 +221,9 @@ func UploadNewBook(c *fiber.Ctx) error {
 
 func UpdateBook(c *fiber.Ctx) error {
 	jwtClaims := c.Locals("jwt").(*jwt.Token).Claims.(jwt.MapClaims)
-	stuId := jwtClaims["stu_id"].(int64)
-	userId := jwtClaims["sub"].(uint)
-	userState := jwtClaims["state"].(int)
+	stuId := int64(jwtClaims["stu_id"].(float64))
+	userId := uint(jwtClaims["sub"].(float64))
+	userState := int(jwtClaims["state"].(float64))
 	// parse request body
 	var bookReq r.Book
 	if err := c.BodyParser(&bookReq); err != nil {
@@ -295,9 +295,9 @@ func UpdateBook(c *fiber.Ctx) error {
 
 func DeleteBook(c *fiber.Ctx) error {
 	jwtClaims := c.Locals("jwt").(*jwt.Token).Claims.(jwt.MapClaims)
-	stuId := jwtClaims["stu_id"].(int64)
-	userId := jwtClaims["sub"].(uint)
-	userState := jwtClaims["state"].(int)
+	stuId := int64(jwtClaims["stu_id"].(float64))
+	userId := uint(jwtClaims["sub"].(float64))
+	userState := int(jwtClaims["state"].(float64))
 	// parse request body
 	var bookReq r.Book
 	if err := c.QueryParser(&bookReq); err != nil {

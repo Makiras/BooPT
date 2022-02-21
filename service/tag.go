@@ -11,9 +11,9 @@ import (
 
 func hasTagManagePermission(c *fiber.Ctx) (bool, error) {
 	jwtClaims := c.Locals("jwt").(*jwt.Token).Claims.(jwt.MapClaims)
-	stuId := jwtClaims["stu_id"].(int64)
-	userId := jwtClaims["sub"].(uint)
-	userState := jwtClaims["state"].(int)
+	stuId := int64(jwtClaims["stu_id"].(float64))
+	userId := uint(jwtClaims["sub"].(float64))
+	userState := int(jwtClaims["state"].(float64))
 
 	// Only authorized user is allowed to manage type
 	var user m.User

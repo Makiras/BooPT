@@ -6,10 +6,12 @@ import (
 	m "BooPT/model"
 	"encoding/base64"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"github.com/go-ldap/ldap/v3"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/jackc/pgconn"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/argon2"
 	"regexp"
@@ -20,6 +22,9 @@ import (
 var emailReg = regexp.MustCompile("\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*")
 
 func ldapAuth(stuId, stuPassword string) (bool, error) {
+
+	//return true, nil // just for debug
+
 	ldapConfig := config.CONFIG.LDAP
 	ldapConn, err := ldap.Dial("tcp", ldapConfig.Addr)
 	if err != nil {
@@ -92,8 +97,8 @@ func Login(c *fiber.Ctx) error {
 		// use base64ed student id to login
 		bStuId := make([]byte, 8)
 		binary.LittleEndian.PutUint64(bStuId, uint64(userData.StuId))
-		salt := base64.RawStdEncoding.EncodeToString(bStuId)
-		if userData.PasswordHash == string(argon2.IDKey([]byte(pass), []byte(salt), 1, 64*1024, 1, 32)) {
+		salt := base64.StdEncoding.EncodeToString(bStuId)
+		if userData.PasswordHash == base64.StdEncoding.EncodeToString(argon2.IDKey([]byte(pass), []byte(salt), 1, 64*1024, 1, 32)) {
 			// sign JWT
 			token, err := jwtSign(userData)
 			if err != nil {
@@ -172,16 +177,23 @@ func Register(c *fiber.Ctx) error {
 	} else if ldapRes {
 		bStuId := make([]byte, 8)
 		binary.LittleEndian.PutUint64(bStuId, uint64(userId))
-		salt := base64.RawStdEncoding.EncodeToString(bStuId)
+		salt := base64.StdEncoding.EncodeToString(bStuId)
 		userData := m.User{
 			Email:        email,
 			Name:         userName,
 			StuId:        userId,
-			PasswordHash: string(argon2.IDKey([]byte(password), []byte(salt), 1, 64*1024, 1, 32)),
+			PasswordHash: base64.StdEncoding.EncodeToString(argon2.IDKey([]byte(password), []byte(salt), 1, 64*1024, 1, 32)),
 		}
 		result := db.DB.Create(&userData)
 		if result.Error != nil {
 			logrus.Errorf("Failed to create user %d due to %#v", userId, result.Error)
+			var pgErr *pgconn.PgError
+			if errors.As(result.Error, &pgErr) && pgErr.Code == "23505" {
+				// duplicate key value violates unique constraint
+				return c.Status(fiber.StatusConflict).JSON(fiber.Map{
+					"error": "Your student id has been used.",
+				})
+			}
 			return c.Status(500).JSON(fiber.Map{
 				"error": "Internal server error",
 			})

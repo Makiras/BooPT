@@ -12,8 +12,8 @@ type Book struct {
 	State         BookState      `json:"state"`                                 // book state
 	Image         string         `json:"image"`                                 // book image
 	Description   string         `json:"description"`                           // book description
-	TypeId        int64          `json:"type_id"`                               // book type id
-	Type          Type           `json:"type"  gorm:"index"`                    // book type
+	TypeId        int64          `json:"type_id" gorm:"index"`                  // book type id
+	Type          Type           `json:"type"`                                  // book type
 	DownloadLinks []DownloadLink `json:"download_links" gorm:"references:BID"`  // book download links
 	Tags          []*Tag         `json:"tags" gorm:"many2many:book_tags"`       // book tags
 }

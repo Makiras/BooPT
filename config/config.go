@@ -21,9 +21,17 @@ type LDAPConf struct {
 	BaseDN   string
 }
 
+type S3Conf struct {
+	AccessKey string
+	SecretKey string
+	Region    string
+	Bucket    string
+}
+
 type Config struct {
 	Database DatabaseConf
 	LDAP     LDAPConf
+	S3       S3Conf
 	LogLevel int // 0: error, 1: warn, 2: info, 3: debug
 	JwtSalt  string
 }
@@ -41,6 +49,12 @@ var CONFIG = Config{
 		User:     "cn=admin,dc=example,dc=com",
 		Password: "admin",
 		BaseDN:   "dc=example,dc=com",
+	},
+	S3: S3Conf{
+		AccessKey: "",
+		SecretKey: "",
+		Region:    "bupt-selfhost-bucket",
+		Bucket:    "boopt",
 	},
 	LogLevel: 3,
 	JwtSalt:  "BooPTJWTSalt",

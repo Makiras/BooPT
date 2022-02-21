@@ -59,4 +59,5 @@ func setPrivateRoutes(app *fiber.App) {
 	r.SetupLinkRouter(api)
 	r.SetupTypeRouter(api)
 	r.SetupTagRouter(api)
+	r.SetupS3Router(api)
 }

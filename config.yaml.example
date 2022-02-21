@@ -9,5 +9,10 @@ ldap:
   user: BooPT2
   password: BooPTPassword2
   base_dn: dc=boo,dc=com
+s3:
+  access_key: test
+  secret_key: test
+  bucket: boopt
+  region: test
 log_level: 3
 jwt_salt: "salt2"
