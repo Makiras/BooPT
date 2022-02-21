@@ -10,9 +10,10 @@ ldap:
   password: BooPTPassword2
   base_dn: dc=boo,dc=com
 s3:
-  access_key: test
-  secret_key: test
+  access_key: minioadmin
+  secret_key: minioadmin
+  endpoint: localhost:9000
   bucket: boopt
-  region: test
+  region: us-east-1
 log_level: 3
 jwt_salt: "salt2"

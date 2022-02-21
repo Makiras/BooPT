@@ -24,6 +24,7 @@ type LDAPConf struct {
 type S3Conf struct {
 	AccessKey string
 	SecretKey string
+	Endpoint  string
 	Region    string
 	Bucket    string
 }
@@ -51,9 +52,10 @@ var CONFIG = Config{
 		BaseDN:   "dc=example,dc=com",
 	},
 	S3: S3Conf{
-		AccessKey: "",
-		SecretKey: "",
-		Region:    "bupt-selfhost-bucket",
+		AccessKey: "minioadmin",
+		SecretKey: "minioadmin",
+		Endpoint:  "http://localhost:9000",
+		Region:    "us-east-1",
 		Bucket:    "boopt",
 	},
 	LogLevel: 3,
