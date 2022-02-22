@@ -4,6 +4,7 @@ import (
 	"BooPT/config"
 	"BooPT/database"
 	r "BooPT/router"
+	"BooPT/storage"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	jwtware "github.com/gofiber/jwt/v3"
@@ -22,6 +23,12 @@ func main() {
 	// get database connection
 	if database.Connect() != nil {
 		logrus.Println("Error connecting to database")
+		os.Exit(1)
+	}
+
+	// init minio client
+	if storage.InitClient() != nil {
+		logrus.Println("Error initializing minio client")
 		os.Exit(1)
 	}
 

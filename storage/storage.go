@@ -47,7 +47,7 @@ func GetPresignedURL(objectName string, expires int64, filename string, preview 
 		context.Background(), CONFIG.S3.Bucket, objectName, time.Second*time.Duration(expires), reqParams)
 }
 
-func PostFilePresignedURL(objectType string, expires int64) (*url.URL, map[string]string, error) {
+func PostFilePresignedURL(objectPath string, objectType string, expires int64) (*url.URL, map[string]string, error) {
 	// file extension is contained in the DownloadLink field of the database. Check GetPresignedURL() for more info.
 
 	policy := minio.NewPostPolicy()
@@ -60,19 +60,19 @@ func PostFilePresignedURL(objectType string, expires int64) (*url.URL, map[strin
 		return nil, nil, err
 	}
 
-	// Only allow 'pdf','epub','mobi','iba','awz' upload.
-	if objectType != "pdf" && objectType != "epub" && objectType != "mobi" && objectType != "iba" && objectType != "awz" {
+	// Only allow 'pdf','epub','mobi','iba','awz3' upload.
+	if objectType != "pdf" && objectType != "epub" && objectType != "mobi" && objectType != "iba" && objectType != "awz3" {
 		return nil, nil, minio.ErrorResponse{
 			Code:      "InvalidArgument",
 			Message:   "Invalid file extension",
-			Resource:  "file." + objectType,
+			Resource:  objectPath + "file." + objectType,
 			RequestID: "",
 		}
 	}
 
 	// I don't care any error reason here, if failed just burn it.
 	errct := policy.SetContentType("application/" + objectType)
-	errk := policy.SetKey("file." + objectType)
+	errk := policy.SetKey(objectPath + "file." + objectType)
 	errclr := policy.SetContentLengthRange(1024, 2*1024*1024*1024) // Only allow content size in range 1KB to 2GB.
 	if errct != nil || errk != nil || errclr != nil {
 		logrus.Errorf("Failed to set policy. Error: %v,%v,%v ", errk, errct, errclr)
@@ -91,4 +91,9 @@ func PostFilePresignedURL(objectType string, expires int64) (*url.URL, map[strin
 		return nil, nil, err
 	}
 	return uploadLink, formData, nil
+}
+
+func CheckObjectExistence(objectName string) error {
+	_, err := minioClient.StatObject(context.Background(), CONFIG.S3.Bucket, objectName, minio.StatObjectOptions{})
+	return err
 }
