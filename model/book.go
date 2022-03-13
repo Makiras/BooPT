@@ -27,13 +27,20 @@ const (
 	BookState_Deleted               // 已删除
 )
 
+type DownloadLinkState int64
+
+const (
+	DownloadLinkState_Unprocessed DownloadLinkState = iota
+	DownloadLinkState_Processed                     // 已处理
+)
+
 type DownloadLink struct {
 	gorm.Model
-	BookId          int64  `json:"book_bid" gorm:"index"` // book bid
-	Link            string `json:"link"`
-	VersionDescribe string `json:"version_describe"`
-	Password        string `json:"password"`
-	State           int64  `json:"state"`
+	BookId          int64             `json:"book_bid" gorm:"index"` // book bid
+	Link            string            `json:"link"`
+	VersionDescribe string            `json:"version_describe"`
+	Password        string            `json:"password"`
+	State           DownloadLinkState `json:"state"`
 }
 
 type Tag struct {

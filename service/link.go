@@ -131,7 +131,7 @@ func UploadNewBookLink(c *fiber.Ctx) error {
 
 	// Check if link is valid (force using https)
 	// todo: if using minio file, we need to check if the file exists
-	if !strings.HasPrefix(link.Link, "https://") || link.State != int64(m.BookState_Unpublished) {
+	if !strings.HasPrefix(link.Link, "https://") || book.State != m.BookState_Published {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid link"})
 	}
 
@@ -200,7 +200,7 @@ func UpdateLink(c *fiber.Ctx) error {
 	dbLink.BookId = m.UpdateIfNotEmpty(link.BookId, dbLink.BookId).(int64)
 	dbLink.Link = m.UpdateIfNotEmpty(link.Link, dbLink.Link).(string)
 	dbLink.Password = m.UpdateIfNotEmpty(link.Password, dbLink.Password).(string)
-	dbLink.State = m.UpdateIfNotEmpty(link.State, dbLink.State).(int64)
+	// dbLink.State = m.UpdateIfNotEmpty(link.State, dbLink.State).(int64)
 	dbLink.VersionDescribe = m.UpdateIfNotEmpty(link.VersionDescribe, dbLink.VersionDescribe).(string)
 
 	if err := db.DB.Save(&dbLink).Error; err != nil {

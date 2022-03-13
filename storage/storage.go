@@ -97,3 +97,12 @@ func CheckObjectExistence(objectName string) error {
 	_, err := minioClient.StatObject(context.Background(), CONFIG.S3.Bucket, objectName, minio.StatObjectOptions{})
 	return err
 }
+
+func DownloadFile(objectName string, filePath string) error {
+	return minioClient.FGetObject(context.Background(), CONFIG.S3.Bucket, objectName, filePath, minio.GetObjectOptions{})
+}
+
+func UploadFile(objectName string, filePath string) error {
+	_, err := minioClient.FPutObject(context.Background(), CONFIG.S3.Bucket, objectName, filePath, minio.PutObjectOptions{})
+	return err
+}
